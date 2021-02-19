@@ -82,16 +82,23 @@ class Scene {
   // Clients 👫
 
   addSelf() {
+    let ranColor = new THREE.Color(0xffffff * Math.random());
     let videoMaterial = makeVideoMaterial("local");
+    let materialArrow = new THREE.MeshBasicMaterial({color : ranColor});
 
-    let _head = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), videoMaterial);
+    let _head = new THREE.Mesh(new THREE.SphereGeometry(1, 24, 24), videoMaterial);
+    let _arrow = new THREE.Mesh(new THREE.ConeGeometry(.50, 1, 32), materialArrow);
 
+    let rotateMotion = -90;
     _head.position.set(0, 0, 0);
+    _arrow.position.set(0, 2, 0);
+    _arrow.rotation.x = THREE.Math.degToRad(rotateMotion);
 
     // https://threejs.org/docs/index.html#api/en/objects/Group
     this.playerGroup = new THREE.Group();
     this.playerGroup.position.set(0, 0.5, 0);
     this.playerGroup.add(_head);
+    this.playerGroup.add(_arrow);
 
     // add group to scene
     this.scene.add(this.playerGroup);
@@ -100,22 +107,30 @@ class Scene {
   // add a client meshes, a video element and  canvas for three.js video texture
   addClient(_id) {
     let videoMaterial = makeVideoMaterial(_id);
+    let materialArrow = makeVideoMaterial(_id);
 
     let _head = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), videoMaterial);
+    let _arrow = new THREE.Mesh(new THREE.ConeGeometry(.50, 1, 32), materialArrow);
+
 
     // set position of head before adding to parent object
 
     _head.position.set(0, 0, 0);
+    _arrow.position.set(0, 2, 0);
 
     // https://threejs.org/docs/index.html#api/en/objects/Group
     var group = new THREE.Group();
     group.add(_head);
+    group.add(_arrow);
 
     // add group to scene
     this.scene.add(group);
 
     clients[_id].group = group;
+
     clients[_id].head = _head;
+    clients[_id].head = _arrow;
+
     clients[_id].desiredPosition = new THREE.Vector3();
     clients[_id].desiredRotation = new THREE.Quaternion();
     clients[_id].movementAlpha = 0;
@@ -218,8 +233,13 @@ class Scene {
   // Rendering 🎥
 
   update() {
+
+    this.camera.position.set((globals.a * -1) * 4, globals.b *4, globals.c);
+
     requestAnimationFrame(() => this.update());
     this.frameCount++;
+
+    
 
     updateEnvironment();
 
